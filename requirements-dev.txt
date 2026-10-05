@@ -1,0 +1,5 @@
+# Dependencias necesarias solo para ejecutar la suite de pruebas.
+-r requirements.txt
+
+pytest==8.4.1
+pytest-asyncio==1.1.0
