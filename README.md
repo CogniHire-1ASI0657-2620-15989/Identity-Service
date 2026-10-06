@@ -1,6 +1,6 @@
 # Identity Service
 
-Microservicio de autenticación y gestión del perfil profesional, desarrollado con FastAPI, SQLAlchemy y PostgreSQL.
+Microservicio horientado a la autenticación y gestión del perfil profesional, desarrollado con FastAPI, SQLAlchemy y PostgreSQL.
 
 ## Requisitos
 
