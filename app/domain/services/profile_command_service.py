@@ -7,6 +7,9 @@ from app.domain.model.commands.change_password_command import (
 from app.domain.model.commands.update_profile_command import (
     UpdateProfileCommand,
 )
+from app.domain.model.commands.add_education_command import AddEducationCommand
+from app.domain.model.commands.update_education_command import UpdateEducationCommand
+from app.domain.model.commands.remove_education_command import RemoveEducationCommand
 
 
 class ProfileCommandService(ABC):
@@ -23,4 +26,16 @@ class ProfileCommandService(ABC):
         self,
         command: ChangePasswordCommand
     ) -> User:
+        pass
+
+    @abstractmethod
+    def handle_add_education(self, command: AddEducationCommand) -> User:
+        pass
+
+    @abstractmethod
+    def handle_update_education(self, command: UpdateEducationCommand) -> User:
+        pass
+
+    @abstractmethod
+    def handle_remove_education(self, command: RemoveEducationCommand) -> User:
         pass

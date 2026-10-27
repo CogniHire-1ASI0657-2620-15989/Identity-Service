@@ -25,6 +25,7 @@ from app.interfaces.rest.resources.update_profile_resource import (
 )
 from app.interfaces.rest.resources.user_resource import UserResource
 from app.interfaces.rest.resources.skill_resources import SkillResource
+from app.interfaces.rest.resources.professional_resources import EducationInputResource
 from app.interfaces.rest.transform.change_password_command_from_resource_assembler import (
     ChangePasswordCommandFromResourceAssembler,
 )
@@ -37,6 +38,7 @@ from app.interfaces.rest.transform.user_resource_from_entity_assembler import (
 from app.domain.model.queries.get_current_profile_query import (
     GetCurrentProfileQuery,
 )
+from app.interfaces.rest.transform.education_command_from_resource_assembler import EducationCommandFromResourceAssembler
 
 router = APIRouter(
     prefix="/api/v1/profile",
@@ -155,6 +157,52 @@ def remove_skill(
 ):
     try:
         user = service.handle_remove_skill(current_user["id"], skill_type, skill_name)
+        return UserResourceFromEntityAssembler.to_resource(user)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@router.post("/me/education", response_model=UserResource, status_code=status.HTTP_201_CREATED)
+def add_education(
+    resource: EducationInputResource,
+    current_user: dict = Security(get_current_user),
+    service: DefaultProfileCommandService = Depends(get_profile_command_service),
+):
+    try:
+        user = service.handle_add_education(
+            EducationCommandFromResourceAssembler.to_add_command(current_user["id"], resource)
+        )
+        return UserResourceFromEntityAssembler.to_resource(user)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@router.put("/me/education/{education_id}", response_model=UserResource)
+def update_education(
+    education_id: str,
+    resource: EducationInputResource,
+    current_user: dict = Security(get_current_user),
+    service: DefaultProfileCommandService = Depends(get_profile_command_service),
+):
+    try:
+        user = service.handle_update_education(
+            EducationCommandFromResourceAssembler.to_update_command(current_user["id"], education_id, resource)
+        )
+        return UserResourceFromEntityAssembler.to_resource(user)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@router.delete("/me/education/{education_id}", response_model=UserResource)
+def remove_education(
+    education_id: str,
+    current_user: dict = Security(get_current_user),
+    service: DefaultProfileCommandService = Depends(get_profile_command_service),
+):
+    try:
+        user = service.handle_remove_education(
+            EducationCommandFromResourceAssembler.to_remove_command(current_user["id"], education_id)
+        )
         return UserResourceFromEntityAssembler.to_resource(user)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))

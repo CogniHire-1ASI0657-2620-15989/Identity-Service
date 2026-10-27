@@ -1,12 +1,16 @@
 from pydantic import BaseModel, Field
 
 
-class EducationResource(BaseModel):
+class EducationInputResource(BaseModel):
     degree: str | None = Field(default=None, max_length=150)
     institution: str | None = Field(default=None, max_length=150)
     field_of_study: str | None = Field(default=None, max_length=150)
     start_year: int | None = Field(default=None, ge=1900, le=2100)
     end_year: int | None = Field(default=None, ge=1900, le=2100)
+
+
+class EducationResource(EducationInputResource):
+    id: str
 
 
 class ExperienceResource(BaseModel):

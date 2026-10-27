@@ -1,4 +1,6 @@
+import json
 from datetime import datetime, timezone
+from uuid import NAMESPACE_URL, uuid4, uuid5
 
 from app.domain.model.value_objects.email_address import EmailAddress
 from app.domain.model.value_objects.person_name import PersonName
@@ -102,7 +104,10 @@ class User:
 
     @property
     def education(self) -> list[dict]:
-        return self._education
+        return [
+            {**item, "id": self._education_identifier(item, index)}
+            for index, item in enumerate(self._education)
+        ]
 
     @property
     def experience(self) -> list[dict]:
@@ -165,3 +170,39 @@ class User:
                 skills.pop(index)
                 return
         raise ValueError("La habilidad no existe.")
+
+    def add_education(self, education: dict) -> None:
+        self._validate_education(education)
+        self._education.append({"id": str(uuid4()), **education})
+
+    def update_education(self, education_id: str, education: dict) -> None:
+        self._validate_education(education)
+        for index, item in enumerate(self._education):
+            if self._education_identifier(item, index) == education_id:
+                self._education[index] = {"id": education_id, **education}
+                return
+        raise ValueError("La formación académica no existe.")
+
+    def remove_education(self, education_id: str) -> None:
+        for index, item in enumerate(self._education):
+            if self._education_identifier(item, index) == education_id:
+                self._education.pop(index)
+                return
+        raise ValueError("La formación académica no existe.")
+
+    def _education_identifier(self, education: dict, index: int) -> str:
+        """Keep records created before education IDs were introduced addressable."""
+        if education.get("id"):
+            return str(education["id"])
+        serialized_education = json.dumps(education, sort_keys=True, ensure_ascii=False, default=str)
+        identity = f"user:{self._id}:education:{index}:{serialized_education}"
+        return str(uuid5(NAMESPACE_URL, identity))
+
+    @staticmethod
+    def _validate_education(education: dict) -> None:
+        if not any(str(education.get(field) or "").strip() for field in ("degree", "institution", "field_of_study")):
+            raise ValueError("La formación académica debe incluir grado, institución o área de estudio.")
+        start_year = education.get("start_year")
+        end_year = education.get("end_year")
+        if start_year is not None and end_year is not None and start_year > end_year:
+            raise ValueError("El año de inicio no puede ser posterior al año de finalización.")

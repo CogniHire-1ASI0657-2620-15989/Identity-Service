@@ -190,7 +190,35 @@ Eliminar una habilidad:
 }
 ```
 
-### 7. Recuperar la contraseña
+### 7. Gestionar formación académica
+
+El campo `education` también puede reemplazarse como parte de `PUT /api/v1/profile/me`. Para administrarlo sin sobrescribir toda la lista, usa los siguientes endpoints autenticados. Cada elemento devuelto en el perfil contiene su `id`.
+
+Añadir una formación:
+
+`POST /api/v1/profile/me/education`
+
+```json
+{
+  "degree": "Ingeniería de Sistemas",
+  "institution": "Universidad Nacional",
+  "field_of_study": "Software",
+  "start_year": 2020,
+  "end_year": 2024
+}
+```
+
+Actualizar una formación:
+
+`PUT /api/v1/profile/me/education/{education_id}`
+
+Eliminar una formación:
+
+`DELETE /api/v1/profile/me/education/{education_id}`
+
+Al crear o actualizar, debe indicarse al menos uno de estos campos: `degree`, `institution` o `field_of_study`. Si se proporcionan ambos años, `start_year` no puede ser posterior a `end_year`.
+
+### 8. Recuperar la contraseña
 
 Solicitar recuperación:
 
@@ -222,7 +250,7 @@ Restablecer la contraseña:
 }
 ```
 
-### 8. Consultar el perfil para otros servicios
+### 9. Consultar el perfil para otros servicios
 
 `GET /api/v1/internal/users/{id}/job-profile`
 

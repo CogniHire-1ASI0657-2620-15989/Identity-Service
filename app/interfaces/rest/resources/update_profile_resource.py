@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 
 from app.interfaces.rest.resources.professional_resources import (
-    EducationResource,
+    EducationInputResource,
     ExperienceResource,
     LanguageResource,
 )
@@ -27,7 +27,7 @@ class UpdateProfileResource(BaseModel):
     work_modality: str | None = Field(default=None, pattern="^(remoto|hibrido|presencial)$")
     hard_skills: list[SkillResource] | None = None
     soft_skills: list[SkillResource] | None = None
-    education: list[EducationResource] | None = None
+    education: list[EducationInputResource] | None = None
     experience: list[ExperienceResource] | None = None
     languages: list[LanguageResource] | None = None
     professional_summary: str | None = Field(default=None, max_length=2000)

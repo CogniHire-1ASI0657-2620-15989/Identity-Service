@@ -8,6 +8,9 @@ from app.domain.model.commands.update_profile_command import (
 from app.domain.model.commands.change_password_command import (
     ChangePasswordCommand,
 )
+from app.domain.model.commands.add_education_command import AddEducationCommand
+from app.domain.model.commands.update_education_command import UpdateEducationCommand
+from app.domain.model.commands.remove_education_command import RemoveEducationCommand
 
 from app.domain.model.value_objects.email_address import EmailAddress
 from app.domain.model.value_objects.person_name import PersonName
@@ -177,3 +180,24 @@ class DefaultProfileCommandService(ProfileCommandService):
             raise ValueError("Usuario no encontrado.")
         user.remove_skill(skill_type, name)
         return self._user_repository.update(user)
+
+    def handle_add_education(self, command: AddEducationCommand) -> User:
+        user = self._get_user(command.user_id)
+        user.add_education(command.education)
+        return self._user_repository.update(user)
+
+    def handle_update_education(self, command: UpdateEducationCommand) -> User:
+        user = self._get_user(command.user_id)
+        user.update_education(command.education_id, command.education)
+        return self._user_repository.update(user)
+
+    def handle_remove_education(self, command: RemoveEducationCommand) -> User:
+        user = self._get_user(command.user_id)
+        user.remove_education(command.education_id)
+        return self._user_repository.update(user)
+
+    def _get_user(self, user_id: int) -> User:
+        user = self._user_repository.find_by_id(user_id)
+        if user is None:
+            raise ValueError("Usuario no encontrado.")
+        return user
