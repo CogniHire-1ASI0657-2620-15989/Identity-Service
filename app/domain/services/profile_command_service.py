@@ -29,6 +29,10 @@ class ProfileCommandService(ABC):
         pass
 
     @abstractmethod
+    def handle_ensure_verified_hard_skill(self, user_id: int, skill_name: str) -> User:
+        pass
+
+    @abstractmethod
     def handle_add_education(self, command: AddEducationCommand) -> User:
         pass
 

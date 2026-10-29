@@ -167,6 +167,21 @@ class DefaultProfileCommandService(ProfileCommandService):
         user.add_skill(skill_type, skill)
         return self._user_repository.update(user)
 
+    def handle_ensure_verified_hard_skill(self, user_id: int, skill_name: str) -> User:
+        user = self._user_repository.find_by_id(user_id)
+        if user is None:
+            raise ValueError("Usuario no encontrado.")
+        normalized_skill_name = skill_name.strip()
+        if not normalized_skill_name:
+            raise ValueError("La habilidad no puede estar vacía.")
+        if any(
+            str(skill.get("name") or "").casefold() == normalized_skill_name.casefold()
+            for skill in user.hard_skills
+        ):
+            return user
+        user.add_skill("hard", {"name": normalized_skill_name})
+        return self._user_repository.update(user)
+
     def handle_update_skill(self, user_id: int, skill_type: str, name: str, skill: dict) -> User:
         user = self._user_repository.find_by_id(user_id)
         if user is None:
