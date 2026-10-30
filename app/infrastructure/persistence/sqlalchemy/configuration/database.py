@@ -10,6 +10,8 @@ from sqlalchemy.orm import (
 
 load_dotenv()
 
+from app.config import get_settings
+
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
@@ -20,6 +22,7 @@ DATABASE_URL = os.getenv(
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
+    connect_args={"options": f"-csearch_path={get_settings().database_schema}"},
 )
 
 
@@ -34,6 +37,9 @@ Base = declarative_base()
 
 
 def initialize_database() -> None:
+    schema = get_settings().database_schema
+    with engine.begin() as connection:
+        connection.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))
     Base.metadata.create_all(bind=engine)
 
     columns = {
