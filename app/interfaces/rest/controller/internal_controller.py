@@ -24,6 +24,7 @@ def get_job_profile(
     return JobProfileResource(
         id=user.id,
         name=user.name.value,
+        segment=user.segment.value,
         target_position=user.target_position,
         expected_city=user.expected_city,
         expected_country=user.expected_country,

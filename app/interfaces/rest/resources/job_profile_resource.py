@@ -11,6 +11,7 @@ from app.interfaces.rest.resources.skill_resources import SkillResource
 class JobProfileResource(BaseModel):
     id: int
     name: str
+    segment: str
     target_position: str | None = None
     expected_city: str | None = None
     expected_country: str | None = None
