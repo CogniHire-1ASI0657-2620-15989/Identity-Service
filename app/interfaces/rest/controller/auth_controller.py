@@ -38,6 +38,7 @@ from app.interfaces.rest.transform.register_user_command_from_resource_assembler
 from app.interfaces.rest.transform.user_resource_from_entity_assembler import (
     UserResourceFromEntityAssembler,
 )
+from app.application.ports.reniec_identity_verifier import ReniecIdentityNotFound, ReniecIdentityUnavailable
 
 
 router = APIRouter(
@@ -76,6 +77,16 @@ def register(
             ),
         )
 
+    except ReniecIdentityUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="La validación de identidad no está disponible. Inténtalo más tarde.",
+        ) from exc
+    except ReniecIdentityNotFound as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Los datos de identidad no pudieron ser validados.",
+        ) from exc
     except ValueError as exc:
         message = str(exc)
 

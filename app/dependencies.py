@@ -39,6 +39,8 @@ from app.infrastructure.security.bcrypt_password_hasher import (
 from app.infrastructure.security.jwt_token_service import (
     JwtTokenService,
 )
+from app.infrastructure.decolecta_reniec_identity_verifier import DecolectaReniecIdentityVerifier
+from app.config import get_settings
 
 
 def get_user_repository(
@@ -74,6 +76,15 @@ def get_token_service():
         ),
     )
 
+
+def get_reniec_identity_verifier():
+    settings = get_settings()
+    return DecolectaReniecIdentityVerifier(
+        base_url=settings.decolecta_base_url,
+        api_key=settings.decolecta_api_key,
+        timeout_seconds=settings.decolecta_timeout_seconds,
+    )
+
 bearer_scheme = HTTPBearer(auto_error=False)
 
 def get_current_user(
@@ -107,12 +118,14 @@ def get_auth_command_service(
     repository=Depends(get_user_repository),
     password_hasher=Depends(get_password_hasher),
     token_service=Depends(get_token_service),
+    reniec_identity_verifier=Depends(get_reniec_identity_verifier),
 ):
 
     return DefaultAuthCommandService(
         user_repository=repository,
         password_hasher=password_hasher,
         token_service=token_service,
+        reniec_identity_verifier=reniec_identity_verifier,
     )
 
 

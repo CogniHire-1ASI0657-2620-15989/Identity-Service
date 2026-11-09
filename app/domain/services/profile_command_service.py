@@ -10,6 +10,7 @@ from app.domain.model.commands.update_profile_command import (
 from app.domain.model.commands.add_education_command import AddEducationCommand
 from app.domain.model.commands.update_education_command import UpdateEducationCommand
 from app.domain.model.commands.remove_education_command import RemoveEducationCommand
+from app.domain.model.commands.add_experience_command import AddExperienceCommand
 
 
 class ProfileCommandService(ABC):
@@ -30,6 +31,10 @@ class ProfileCommandService(ABC):
 
     @abstractmethod
     def handle_ensure_verified_hard_skill(self, user_id: int, skill_name: str) -> User:
+        pass
+
+    @abstractmethod
+    def handle_add_experience(self, command: AddExperienceCommand) -> User:
         pass
 
     @abstractmethod

@@ -14,7 +14,10 @@ class RegisterUserCommandFromResourceAssembler:
     ) -> RegisterUserCommand:
 
         return RegisterUserCommand(
-            name=resource.name,
+            dni=resource.dni,
+            first_name=resource.first_name,
+            first_last_name=resource.first_last_name,
+            second_last_name=resource.second_last_name,
             email=str(resource.email),
             password=resource.password,
             segment=resource.segment,

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class EducationInputResource(BaseModel):
@@ -20,6 +20,19 @@ class ExperienceResource(BaseModel):
     start_date: str | None = Field(default=None, max_length=20)
     end_date: str | None = Field(default=None, max_length=20)
     current: bool = False
+
+
+class ExperienceInputResource(BaseModel):
+    company: str = Field(min_length=1, max_length=150)
+    position: str = Field(min_length=1, max_length=150)
+    start_date: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+    end_date: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+
+    @model_validator(mode="after")
+    def validate_date_range(self):
+        if self.end_date < self.start_date:
+            raise ValueError("La fecha hasta no puede ser anterior a la fecha desde.")
+        return self
 
 
 class LanguageResource(BaseModel):

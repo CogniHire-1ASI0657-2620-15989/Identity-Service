@@ -171,6 +171,28 @@ class User:
                 return
         raise ValueError("La habilidad no existe.")
 
+    def add_experience(self, experience: dict) -> None:
+        company = str(experience.get("company") or "").strip()
+        position = str(experience.get("position") or "").strip()
+        start_date = str(experience.get("start_date") or "")
+        end_date = str(experience.get("end_date") or "")
+        if not company or not position:
+            raise ValueError("La experiencia laboral requiere empresa y puesto.")
+        if not start_date or not end_date:
+            raise ValueError("La experiencia laboral requiere fecha desde y hasta.")
+        if end_date < start_date:
+            raise ValueError("La fecha hasta no puede ser anterior a la fecha desde.")
+        self._experience.append(
+            {
+                "company": company,
+                "position": position,
+                "start_date": start_date,
+                "end_date": end_date,
+                "description": None,
+                "current": False,
+            }
+        )
+
     def add_education(self, education: dict) -> None:
         self._validate_education(education)
         self._education.append({"id": str(uuid4()), **education})

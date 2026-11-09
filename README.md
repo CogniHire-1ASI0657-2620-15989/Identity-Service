@@ -19,6 +19,10 @@ JWT_SECRET_KEY=una-clave-secreta-para-desarrollo
 JWT_ISSUER=identity-service
 JWT_AUDIENCE=job-platform-services
 JWT_EXPIRATION_MINUTES=60
+INTERNAL_API_KEY=una-clave-interna-compartida-con-el-gateway
+DECOLECTA_BASE_URL=https://api.decolecta.com
+DECOLECTA_API_KEY=tu-token-decolecta
+DECOLECTA_TIMEOUT_SECONDS=3
 ```
 
 Instala las dependencias:
@@ -59,7 +63,10 @@ Al iniciar, el servicio crea las tablas necesarias si no existen.
 
 ```json
 {
-  "name": "Ana García",
+  "dni": "46027896",
+  "first_name": "Roxana",
+  "first_last_name": "Delgado",
+  "second_last_name": "Cuellar",
   "email": "ana.garcia@example.com",
   "password": "secreto123",
   "segment": "trabajador",
@@ -75,6 +82,8 @@ Bearer <access_token>
 ```
 
 Los segmentos válidos son `trabajador` y `practicante`.
+
+El registro consulta el DNI en Decolecta y solo crea la cuenta cuando los nombres y apellidos proporcionados coinciden. El token `DECOLECTA_API_KEY` se configura únicamente en Identity-Service.
 
 ### 2. Iniciar sesión
 
@@ -218,7 +227,22 @@ Eliminar una formación:
 
 Al crear o actualizar, debe indicarse al menos uno de estos campos: `degree`, `institution` o `field_of_study`. Si se proporcionan ambos años, `start_year` no puede ser posterior a `end_year`.
 
-### 8. Recuperar la contraseña
+### 8. Añadir experiencia laboral
+
+`POST /api/v1/profile/me/experience`
+
+```json
+{
+  "company": "Empresa X",
+  "position": "Backend Developer",
+  "start_date": "2022-01",
+  "end_date": "2024-06"
+}
+```
+
+Todos los campos son obligatorios. Las fechas usan el formato `YYYY-MM` y la fecha `end_date` no puede ser anterior a `start_date`.
+
+### 9. Recuperar la contraseña
 
 Solicitar recuperación:
 
@@ -250,7 +274,7 @@ Restablecer la contraseña:
 }
 ```
 
-### 9. Consultar el perfil para otros servicios
+### 10. Consultar el perfil para otros servicios
 
 `GET /api/v1/internal/users/{id}/job-profile`
 

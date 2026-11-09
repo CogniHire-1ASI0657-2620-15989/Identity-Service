@@ -2,6 +2,10 @@ from datetime import datetime, timezone
 
 from app.application.ports.password_hasher import PasswordHasher
 from app.application.ports.token_service import TokenService
+from app.application.ports.reniec_identity_verifier import (
+    ReniecIdentityNotFound,
+    ReniecIdentityVerifier,
+)
 
 from app.domain.model.aggregates.user import User
 
@@ -28,10 +32,12 @@ class DefaultAuthCommandService(AuthCommandService):
         user_repository: UserRepository,
         password_hasher: PasswordHasher,
         token_service: TokenService,
+        reniec_identity_verifier: ReniecIdentityVerifier,
     ):
         self._user_repository = user_repository
         self._password_hasher = password_hasher
         self._token_service = token_service
+        self._reniec_identity_verifier = reniec_identity_verifier
 
     def handle_register(
         self,
@@ -44,8 +50,6 @@ class DefaultAuthCommandService(AuthCommandService):
 
         if existing_user is not None:
             raise ValueError("El email ya está registrado.")
-
-        name = PersonName(command.name)
 
         segment = UserSegment.from_value(command.segment)
 
@@ -67,6 +71,14 @@ class DefaultAuthCommandService(AuthCommandService):
                 "La contraseña debe tener al menos 6 caracteres."
             )
 
+        identity = self._reniec_identity_verifier.find_by_dni(command.dni)
+        if not self._identity_matches(command, identity):
+            raise ReniecIdentityNotFound("Los datos de identidad no coinciden.")
+
+        name = PersonName(
+            f"{command.first_name.strip()} {command.first_last_name.strip()} {command.second_last_name.strip()}"
+        )
+
         password_hash = self._password_hasher.hash(
             command.password
         )
@@ -86,6 +98,26 @@ class DefaultAuthCommandService(AuthCommandService):
         access_token = self._token_service.generate(saved_user)
 
         return saved_user, access_token
+
+    @staticmethod
+    def _identity_matches(command: RegisterUserCommand, identity) -> bool:
+        return (
+            DefaultAuthCommandService._normalize(command.first_name)
+            == DefaultAuthCommandService._normalize(identity.first_name).split(" ")[0]
+            and DefaultAuthCommandService._normalize(command.first_last_name)
+            == DefaultAuthCommandService._normalize(identity.first_last_name)
+            and DefaultAuthCommandService._normalize(command.second_last_name)
+            == DefaultAuthCommandService._normalize(identity.second_last_name)
+        )
+
+    @staticmethod
+    def _normalize(value: str) -> str:
+        import unicodedata
+
+        decomposed = unicodedata.normalize("NFD", value)
+        return " ".join(
+            "".join(character for character in decomposed if unicodedata.category(character) != "Mn").casefold().split()
+        )
 
     def handle_authenticate(
         self,
