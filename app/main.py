@@ -1,9 +1,9 @@
 from secrets import compare_digest
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 
 from app.config import get_settings
+from app.observability import install_observability, problem_response
 
 from app.infrastructure.persistence.sqlalchemy.configuration.database import (
     initialize_database,
@@ -48,8 +48,17 @@ async def require_internal_api_key(request: Request, call_next):
     if request.url.path == "/health":
         return await call_next(request)
     if not compare_digest(request.headers.get("X-Internal-Api-Key", ""), get_settings().internal_api_key):
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized service request."})
+        return problem_response(
+            request,
+            status_code=401,
+            title="Unauthorized",
+            detail="Unauthorized service request.",
+            problem_type="urn:pathbridge:problem:http-401",
+        )
     return await call_next(request)
+
+
+install_observability(app, "identity-service")
 
 
 @app.get("/health")

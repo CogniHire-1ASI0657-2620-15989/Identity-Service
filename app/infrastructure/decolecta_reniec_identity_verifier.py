@@ -6,6 +6,7 @@ from app.application.ports.reniec_identity_verifier import (
     ReniecIdentityUnavailable,
     ReniecIdentityVerifier,
 )
+from app.observability import outbound_headers
 
 
 class DecolectaReniecIdentityVerifier(ReniecIdentityVerifier):
@@ -22,7 +23,7 @@ class DecolectaReniecIdentityVerifier(ReniecIdentityVerifier):
                 response = client.get(
                     f"{self._base_url}/v1/reniec/dni",
                     params={"numero": dni},
-                    headers={"Authorization": f"Bearer {self._api_key}", "Accept": "application/json"},
+                    headers=outbound_headers({"Authorization": f"Bearer {self._api_key}", "Accept": "application/json"}),
                 )
         except httpx.HTTPError as exc:
             raise ReniecIdentityUnavailable("RENIEC validation is temporarily unavailable.") from exc
